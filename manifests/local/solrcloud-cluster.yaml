@@ -1,0 +1,51 @@
+apiVersion: solr.apache.org/v1beta1
+kind: SolrCloud
+metadata:
+  name: cluster
+  namespace: solr
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  replicas: 2
+  solrImage:
+    repository: solr
+    tag: "9.5.0"
+  solrJavaMem: "-Xms512m -Xmx512m"
+  customSolrKubeOptions:
+    podOptions:
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+        limits:
+          memory: "1.5Gi"
+  zookeeperRef:
+    provided:
+      replicas: 3
+      image:
+        repository: pravega/zookeeper
+        tag: "0.2.15"
+        pullPolicy: IfNotPresent
+      persistence:
+        spec:
+          resources:
+            requests:
+              storage: "5Gi"
+      zookeeperPodPolicy:
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            memory: "768Mi"
+  solrAddressability:
+    podPort: 8983
+    commonServicePort: 80
+  dataStorage:
+    persistent:
+      reclaimPolicy: Delete
+      pvcTemplate:
+        spec:
+          resources:
+            requests:
+              storage: "5Gi"
