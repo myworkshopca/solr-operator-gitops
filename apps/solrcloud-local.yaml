@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: solrcloud-local
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/myworkshopca/solr-operator-gitops.git
+    targetRevision: main
+    path: manifests/local
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: solr
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - PruneLast=true
+      - PrunePropagationPolicy=foreground
+  ignoreDifferences:
+    - group: solr.apache.org
+      kind: SolrCloud
+      jsonPointers:
+        - /status
